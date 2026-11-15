@@ -1,0 +1,50 @@
+spec_version: "2.1"
+app_id: com.ridewind.wsscrcpyweb
+version: 0.5.11
+support_arch:
+  - arm64
+product_series:
+  - nasync
+supports:
+  - app
+  - pc
+# Docker application: the whole runtime lives in the image under
+# rootfs_{arch}/images/, and the only files the package validator accepts in a
+# docker app rootfs are icon.png and docker-compose.yaml (measured: ugcli
+# rejects anything else with "only [icon.png, docker-compose.yaml] are allowed
+# for docker app"). start_cmd is not required when is_docker_app is true.
+is_docker_app: true
+# depend_docker_version is mandatory for docker apps; 1.21.0.0054 is the Docker
+# suite version installed on the target DH4300 Plus.
+depend_docker_version: 1.21.0.0054
+depend_fw_version: 1.13.0.0000
+# The port the container publishes. The gateway/UGREENlink entry is built from
+# this, so it must match the published port in docker-compose.yaml.
+port: 8000
+# Without proxy_path the gateway serves www/ statically and never reaches the
+# backend; "/" forwards everything to the app.
+proxy_path: /
+open_type: inner
+tag_types:
+  - utility
+privacy_policy_link:
+  - https://github.com/RideWindOne/ws-scrcpy-web/blob/main/PRIVACY.md
+license_agreement_link:
+  - https://github.com/RideWindOne/ws-scrcpy-web/blob/main/LICENSE
+source_code_link:
+  - https://github.com/RideWindOne/ws-scrcpy-web
+technical_support_link:
+  - https://github.com/RideWindOne/ws-scrcpy-web/issues
+i18n:
+  zh-CN:
+    name: 安卓投屏
+    description: 在浏览器里投屏与控制安卓设备，基于 Docker 容器运行，无需在系统里安装 Node 运行时。
+    author: Ride_Wind
+    official: https://github.com/RideWindOne/ws-scrcpy-web
+    help: https://github.com/RideWindOne/ws-scrcpy-web
+  en-US:
+    name: Android Screen Mirror
+    description: Mirror and control Android devices in a browser. Runs as a Docker container with no system Node runtime.
+    author: Ride_Wind
+    official: https://github.com/RideWindOne/ws-scrcpy-web
+    help: https://github.com/RideWindOne/ws-scrcpy-web
