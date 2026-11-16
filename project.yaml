@@ -25,6 +25,19 @@ port: 8000
 # backend; "/" forwards everything to the app.
 proxy_path: /
 open_type: inner
+# 安装时选择存放投屏数据（数据库、配置、ADB 密钥、依赖）的共享文件夹。
+# 升级时请选回原来的目录，否则看不到已有的设备列表与配置。
+parameters:
+  - key: DATA_PATH
+    type: path
+    required: true
+    i18n:
+      zh-CN:
+        name: 数据目录
+        description: 选择存放投屏数据库、配置与 ADB 密钥的共享文件夹。升级安装请选回原来的目录（默认 /volume1/docker/wsdata），否则已有设备列表与配置不会沿用。
+      en-US:
+        name: Data directory
+        description: Folder for the database, config and ADB keys. On upgrade pick the previous folder (default /volume1/docker/wsdata) so existing devices and settings are kept.
 tag_types:
   - utility
 privacy_policy_link:
@@ -38,13 +51,13 @@ technical_support_link:
 i18n:
   zh-CN:
     name: 安卓投屏
-    description: 在浏览器里投屏与控制安卓设备，基于 Docker 容器运行，无需在系统里安装 Node 运行时。
+    description: 在浏览器里投屏与控制安卓设备，基于 Docker 容器运行，无需在系统里安装 Node 运行时。安装时可选择数据目录，数据库、配置与 ADB 密钥都存放在该目录。
     author: Ride_Wind
     official: https://github.com/RideWindOne/ws-scrcpy-web
     help: https://github.com/RideWindOne/ws-scrcpy-web
   en-US:
     name: Android Screen Mirror
-    description: Mirror and control Android devices in a browser. Runs as a Docker container with no system Node runtime.
+    description: Mirror and control Android devices in a browser. Runs as a Docker container with no system Node runtime. A data folder can be chosen at install time; the database, config and ADB keys live there.
     author: Ride_Wind
     official: https://github.com/RideWindOne/ws-scrcpy-web
     help: https://github.com/RideWindOne/ws-scrcpy-web

@@ -32,7 +32,7 @@ services:
       PORT: "8001"
       WS_SCRCPY_WEB_PORT: "8001"
     volumes:
-      - /volume1/docker/wsdata:/data
+      - ${DATA_PATH}:/data
       - /var/lib/ugb/com.ridewind.wsscrcpyweb:/cfg/ugb
       - /volume1/@appstore/com.ridewind.wsscrcpyweb:/cfg/appstore
     entrypoint:
@@ -54,7 +54,12 @@ services:
         const CHECKUPK = '/cfg/appstore/.check-upk';
         const MARK_RESTART = DATA + '/.fixer-last-restart';
         const MARK_PATCHED = DATA + '/.fixer-patched';
-        const PORT_INFO = '"portInfo": {"httpsEnable": false, "port": "8000", "httpsPort": "", "urlPath": ""},';
+        // Entry port UGOS puts in the app's URL. Docker publishes 8000, so that
+        // is the default; WS_ENTRY_PORT overrides it when the published port is
+        // changed in compose (keep the two in sync — UGOS builds the desktop
+        // entry from this value, and a mismatch sends the window to a dead port).
+        const ENTRY_PORT = String(process.env.WS_ENTRY_PORT || '8000');
+        const PORT_INFO = '"portInfo": {"httpsEnable": false, "port": "' + ENTRY_PORT + '", "httpsPort": "", "urlPath": ""},';
         const HOSTS = ['*.ugdocker.link', '*.ugapp.link', '*.ug.link', '*.windtech.top'];
         const SKIP_FIXER = process.env.WS_SKIP_FIXER === '1';
 
@@ -230,11 +235,36 @@ services:
 
         function patchPortInfo(p, label) {
           const s = readSafe(p);
-          if (!s || s.indexOf('"portInfo"') > -1) return false;
-          const out = s.replace('"baseAccessInfo":{', '"baseAccessInfo":{' + PORT_INFO);
-          if (out === s) return false;
+          if (!s) return false;
+          // Match the key with optional whitespace: UGOS writes compact JSON
+          // today, but a pretty-printed file (`"baseAccessInfo": {`) made the
+          // previous literal-string replace fail SILENTLY — no portInfo, so UGOS
+          // fell back to port 80 and the desktop entry timed out.
+          if (!/"baseAccessInfo"\s*:\s*\{/.test(s)) {
+            log('portInfo: baseAccessInfo not found in ' + label);
+            return false;
+          }
+          // Replace any existing portInfo wholesale, so a port change (or a
+          // half-written earlier patch) cannot leave the entry pointing at a
+          // stale port.
+          let out;
+          if (/"portInfo"\s*:/.test(s)) {
+            out = s.replace(
+              /"portInfo"\s*:\s*\{[^}]*\},?/,
+              PORT_INFO,
+            );
+          } else {
+            out = s.replace(/"baseAccessInfo"\s*:\s*\{/, function (m) { return m + PORT_INFO; });
+          }
+          if (out === s) { log('portInfo: no change for ' + label); return false; }
+          try {
+            JSON.parse(out);
+          } catch (e) {
+            log('portInfo: result is not valid JSON for ' + label + ', kept file as-is');
+            return false;
+          }
           fs.writeFileSync(p, out);
-          log('portInfo patched: ' + label);
+          log('portInfo patched: ' + label + ' -> ' + ENTRY_PORT);
           return true;
         }
 
