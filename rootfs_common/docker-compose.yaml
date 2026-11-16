@@ -32,7 +32,10 @@ services:
       PORT: "8001"
       WS_SCRCPY_WEB_PORT: "8001"
     volumes:
-      - ${DATA_PATH}:/data
+      # 固定兜底：参数留空时也要有持久目录，否则数据库会写进容器内层丢掉
+      - /volume1/docker/wsdata:/data
+      # 安装时若选了别的共享文件夹，额外挂到 /user-data，启动脚本优先用它
+      - ${DATA_PATH}:/user-data
       - /var/lib/ugb/com.ridewind.wsscrcpyweb:/cfg/ugb
       - /volume1/@appstore/com.ridewind.wsscrcpyweb:/cfg/appstore
     entrypoint:
@@ -48,7 +51,8 @@ services:
 
         const PORT = 8001;
         const HOST = '127.0.0.1';
-        const DATA = '/data';
+        // 安装参数选了别的目录时会多挂一个 /user-data，优先用它；没选就用 /data（固定兜底）。
+        const DATA = fs.existsSync('/user-data') ? '/user-data' : '/data';
         const CFG_UG = '/cfg/ugb/config.json';
         const CFG_STORE = '/cfg/appstore/config.json';
         const CHECKUPK = '/cfg/appstore/.check-upk';

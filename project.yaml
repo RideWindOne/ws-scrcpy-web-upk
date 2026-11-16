@@ -30,7 +30,7 @@ open_type: inner
 parameters:
   - key: DATA_PATH
     type: path
-    required: true
+    required: false
     i18n:
       zh-CN:
         name: 数据目录
